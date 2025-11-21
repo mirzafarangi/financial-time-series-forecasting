@@ -1,0 +1,43 @@
+================================================================================
+BITCOIN PRICE FORECASTING - MODEL COMPARISON SUMMARY
+================================================================================
+
+Dataset: Bitcoin (BTC-USD) Daily Prices
+Test Period: Last 30 days
+Models Compared: ARIMA, SARIMA, Prophet
+
+================================================================================
+PERFORMANCE METRICS
+================================================================================
+
+Model         MAE ($)   RMSE ($)   MAPE (%)   Dir. Acc. (%)
+------------------------------------------------------------
+ARIMA         1546.73    2044.49       1.77           96.55
+SARIMA         932.45    1160.91       1.07           89.66
+Prophet       2148.22    2229.28       2.51           96.55
+
+================================================================================
+KEY FINDINGS
+================================================================================
+
+🏆 Best Overall (MAPE): SARIMA
+   - MAPE: 1.07%
+   - Direction Accuracy: 89.66%
+
+📊 Lowest Error (MAE): SARIMA
+   - MAE: $932.45
+
+🎯 Best Direction Prediction: ARIMA
+   - Direction Accuracy: 96.55%
+
+================================================================================
+BUSINESS INSIGHTS
+================================================================================
+
+1. All models outperform random (50%) in direction prediction
+2. MAPE values indicate <5% error for price forecasting
+3. Prophet captures seasonality well (weekly and yearly patterns)
+4. SARIMA adds value by modeling weekly crypto market patterns
+5. Models suitable for short-term (30-day) price forecasting
+
+================================================================================
