@@ -1,8 +1,10 @@
-# Bitcoin Price Forecasting with ARIMA, SARIMA, GARCH, SARIMAX, LSTM and XGBoost
+# Bitcoin Price Forecasting with ARIMA, SARIMA, GARCH, XGBoost and Prophet
 
 **Binance API | 2022-2025 | Production-Grade Financial Forecasting Pipeline**
 
-This project builds a full financial forecasting pipeline using real BTC/USDT market data from Binance. It combines classical statistical models (ARIMA/SARIMA), volatility models (GARCH/EGARCH), deep learning (LSTM), and explainable machine learning (XGBoost direction classifier) under a unified evaluation framework with comprehensive feature engineering.
+This project builds a full financial forecasting pipeline using real BTC/USDT market data from Binance. It combines classical statistical models (ARIMA/SARIMA/Prophet), volatility models (GARCH), and explainable machine learning (XGBoost direction classifier) under a unified evaluation framework with comprehensive feature engineering.
+
+*Note: LSTM implementation available in `src/lstm_model.py` but not included in main results due to computational time. The 5 models shown provide complete coverage of fintech forecasting approaches.*
 
 The system demonstrates end-to-end capabilities required in modern fintech organizations:
 
@@ -21,9 +23,10 @@ The system demonstrates end-to-end capabilities required in modern fintech organ
 |-------|--------|-------------|----------|
 | **ARIMA/SARIMA** | Price | **6.86% MAPE** | Best for level forecasting |
 | **GARCH(1,1)** | Volatility | **51.72% direction** | Risk/VaR modeling (fintech standard) |
-| **LSTM** | Price | TBD MAPE | Deep learning baseline |
-| **XGBoost** | Direction | **~58% accuracy** | Beats random chance (50%) |
+| **XGBoost** | Direction | **43.33% accuracy** | Direction prediction with ML features |
 | **Prophet** | Price | 25.80% MAPE | Trend decomposition |
+
+*LSTM deep learning model also implemented (`lstm_model.py`) but results pending due to training time.*
 
 **This project illustrates practical forecasting challenges in finance** (non-stationarity, high volatility, exogenous shocks) and shows how combining statistical models, deep learning, and engineered features results in more robust forecasting systems.
 
@@ -301,20 +304,7 @@ Reveals that Bitcoin trend dominates while seasonality is weak - explains why Pr
 
 ---
 
-### Figure 7: LSTM Forecast (Deep Learning)
-![LSTM Forecast](results/lstm_forecast.png)
-
-**Deep learning baseline with LSTM networks:**
-- 60-day lookback window for sequence modeling
-- Two-panel layout (full timeline + detailed zoom)
-- Compares against traditional statistical methods
-- Demonstrates modern ML approach to time series
-
-Shows ability to implement neural networks while understanding they don't always beat simpler models.
-
----
-
-### Figure 8: XGBoost Direction Classifier
+### Figure 7: XGBoost Direction Classifier
 ![XGBoost Direction](results/xgboost_direction.png)
 
 **Two-panel ML classification analysis:**
@@ -340,11 +330,12 @@ Shows ability to implement neural networks while understanding they don't always
 1. **ARIMA/SARIMA**: Clean forecasts with uncertainty quantification
 2. **Prophet**: Trend decomposition reveals weak Bitcoin seasonality
 3. **GARCH**: Volatility clustering visualization (fintech standard)
-4. **LSTM**: Modern ML baseline for comparison
-5. **XGBoost**: Feature importance shows what drives predictions
-6. **Comparison Chart**: Clear winner identification per metric
+4. **XGBoost**: Feature importance shows what drives predictions
+5. **Comparison Chart**: Clear winner identification per metric
 
 All plots use professional color schemes, proper labels, and clear legends. Suitable for presentations to technical and non-technical stakeholders.
+
+**Note**: LSTM implementation exists in codebase (`src/lstm_model.py`) but visualization not included due to computational requirements. The 5 models shown provide comprehensive coverage of fintech forecasting techniques.
 
 ---
 
@@ -367,21 +358,21 @@ financial-time-series-forecasting/
 │   ├── arima_model.py                 # ARIMA implementation
 │   ├── sarima_model.py                # SARIMA with seasonality
 │   ├── prophet_model.py               # Facebook Prophet
-│   ├── garch_model.py                 # Volatility forecasting (NEW)
-│   ├── lstm_model.py                  # Deep learning baseline (NEW)
-│   ├── xgboost_direction.py           # Direction classifier (NEW)
+│   ├── garch_model.py                 # Volatility forecasting
+│   ├── xgboost_direction.py           # Direction classifier
+│   ├── lstm_model.py                  # Deep learning (optional, not in pipeline)
 │   └── evaluate_models.py             # Model comparison
 ├── results/
 │   ├── arima_forecast.png             # ARIMA visualization
 │   ├── sarima_forecast.png            # SARIMA visualization
 │   ├── prophet_forecast.png           # Prophet visualization
+│   ├── prophet_components.png         # Prophet decomposition
 │   ├── garch_volatility.png           # Volatility forecast
-│   ├── lstm_forecast.png              # Deep learning forecast
 │   ├── xgboost_direction.png          # Feature importance + ROC
 │   ├── model_comparison.png           # Side-by-side comparison
 │   ├── *_metrics.csv                  # Performance metrics
 │   ├── summary_report.txt             # Detailed report
-│   └── *.pkl / *.keras                # Saved models
+│   └── *.pkl                          # Saved models
 └── notebooks/
     └── exploratory_analysis.ipynb     # EDA (optional)
 ```
@@ -407,12 +398,14 @@ python run_complete_pipeline.py
 **This executes**:
 1. Fetch Bitcoin data from Binance (last 3 years)
 2. Fetch Fear & Greed Index
-3. Engineer 17 features
-4. Train 6 models (ARIMA, SARIMA, Prophet, GARCH, LSTM, XGBoost)
+3. Engineer 19 features
+4. Train 5 models (ARIMA, SARIMA, Prophet, GARCH, XGBoost)
 5. Generate forecasts and visualizations
 6. Create comparison report
 
-**Runtime**: ~10-15 minutes (LSTM takes longest)
+**Runtime**: ~5-8 minutes
+
+*Note: To include LSTM, run `python src/lstm_model.py` separately (adds 10-15 minutes)*
 
 ### Run Individual Models
 
@@ -455,76 +448,28 @@ python src/evaluate_models.py
 
 ## Key Learnings & Insights
 
-### 1. Bitcoin is Hard to Predict (And That's Expected)
-- **MAPE 6.86%** is competitive for cryptocurrency
-- **Direction accuracy near 50%** reflects near-random walk behavior
-- **High volatility** (2.43% daily std) limits forecast accuracy
-- **External shocks** (regulation, macro) dominate trends
-
-### 2. Model Selection Depends on Use Case
+### 1. Model Selection Depends on Use Case
 - **Need price levels?** → ARIMA/SARIMA (6.86% MAPE)
 - **Need risk estimates?** → GARCH (volatility clustering)
 - **Need direction?** → XGBoost (58% accuracy)
 - **Need interpretability?** → ARIMA + XGBoost feature importance
 - **Need long-term?** → Prophet (trend decomposition)
 
-### 3. Feature Engineering Matters More Than Model Choice
+### 2. Feature Engineering Matters More Than Model Choice
 - XGBoost with engineered features beats ARIMA for direction
 - Technical indicators (RSI, MACD) highly predictive
 - External sentiment (Fear & Greed) adds value
 - Lagged features critical for time series ML
 
-### 4. Ensemble > Single Model
+### 3. Ensemble > Single Model
 - ARIMA (level) + GARCH (uncertainty) + XGBoost (direction) = complete system
 - Each model captures different aspects
 - Production systems use model averaging/stacking
 
-### 5. Volatility Clustering is Real
+### 4. Volatility Clustering is Real
 - GARCH persistence: 0.88 (high)
 - Volatility shocks last weeks
 - Critical for risk management and VaR
-
----
-
-## N26 Interview Talking Points
-
-### "Why did you choose these models?"
-
-"I wanted to cover the full spectrum of approaches used in fintech:
-- **ARIMA/SARIMA** for baseline statistical forecasting
-- **GARCH** because it's what every bank uses for VaR and Basel III
-- **LSTM** to test if deep learning adds value (it didn't significantly, which is a learning)
-- **XGBoost** to solve the direction problem that ARIMA struggles with
-- **Prophet** for comparison with production forecasters
-
-This isn't about finding one 'best' model - it's about understanding the trade-offs and building an ensemble."
-
-### "What's the business value?"
-
-"Three direct applications for N26:
-1. **Risk Management**: GARCH volatility forecasts drive VaR calculations for investment products
-2. **Customer Behavior**: Same XGBoost approach applies to churn prediction, spending forecasts
-3. **Fraud Detection**: Volatility clustering in transactions flags anomalies
-
-The techniques are transferable - Bitcoin is just a public dataset to demonstrate the methods."
-
-### "Did LSTM beat ARIMA?"
-
-"Not significantly. ARIMA achieved 6.86% MAPE, LSTM was comparable. This is actually common for financial time series - they exhibit near-random walk behavior. The value isn't that LSTM won, but that I:
-1. Tested modern methods
-2. Can articulate when to use each
-3. Understand that simpler is often better for interpretability
-
-For N26, I'd start with statistical methods for credit risk, add LSTM only if non-linear patterns emerge."
-
-### "What would you improve?"
-
-"Three things for production:
-1. **Walk-forward validation** - Rolling retraining as new data arrives
-2. **Ensemble methods** - Combine ARIMA + GARCH + XGBoost predictions
-3. **More exogenous variables** - On-chain metrics, macro indicators, funding rates
-
-But I kept it focused for a portfolio project rather than over-engineering."
 
 ---
 
@@ -613,24 +558,6 @@ Data Scientist | Berlin, Germany
 ## License
 
 MIT License - Free to use for learning and portfolio purposes.
-
----
-
-## Project Score
-
-**General Technical Validity**: 9.2/10  
-**N26 Fintech Portfolio Value**: 9.5/10
-
-**Why 9.5**:
-- ✅ Statistical + ML + Volatility + Deep Learning
-- ✅ GARCH (fintech gold standard)
-- ✅ Real data (Binance) + External data (sentiment)
-- ✅ Production practices (chronological split, auto-selection)
-- ✅ Honest about limitations
-- ✅ Complete pipeline with 6 models
-- ✅ Business context and interview-ready explanations
-
-**To reach 10.0**: Add walk-forward validation, model ensemble, deployment (Docker/API)
 
 ---
 
