@@ -1,6 +1,7 @@
 """
 Bitcoin Price Data Loading and Preprocessing
 Fetches BTC/USDT historical data from Binance Exchange
+Includes exogenous variables (Fear & Greed Index)
 """
 
 import pandas as pd
@@ -8,6 +9,7 @@ import numpy as np
 from pathlib import Path
 from binance.client import Client
 from datetime import datetime, timedelta
+from fetch_fear_greed import fetch_fear_greed_index, merge_with_price_data
 
 
 def fetch_bitcoin_data_binance(start_date='2020-01-01', end_date=None, interval='1d'):
@@ -222,7 +224,13 @@ def main():
     
     # Save raw data
     df.to_csv(data_dir / "btc_raw_data.csv", index=False)
-    print(f"\n💾 Saved raw data: {data_dir / 'btc_raw_data.csv'}")
+    print(f"\nSaved raw data: {data_dir / 'btc_raw_data.csv'}")
+    
+    # Fetch Fear & Greed Index (exogenous variable)
+    fear_greed_df = fetch_fear_greed_index(limit=2000)
+    
+    # Merge with price data
+    df = merge_with_price_data(df, fear_greed_df)
     
     # Preprocess
     df_processed = preprocess_data(df)
@@ -235,15 +243,16 @@ def main():
     train_df.to_csv(data_dir / "train.csv", index=False)
     test_df.to_csv(data_dir / "test.csv", index=False)
     
-    print(f"\n💾 Saved processed data:")
+    print(f"\nSaved processed data:")
     print(f"   Full dataset: {data_dir / 'btc_processed.csv'}")
     print(f"   Train set: {data_dir / 'train.csv'}")
     print(f"   Test set: {data_dir / 'test.csv'}")
     
     print("\n" + "="*80)
-    print("✅ DATA LOADING COMPLETE")
+    print("DATA LOADING COMPLETE")
     print("="*80)
-    print("\nNext step: Run 'python src/arima_model.py' to train ARIMA model")
+    print("\nDataset includes exogenous variable: Crypto Fear & Greed Index")
+    print("Next step: Run 'python run_complete_pipeline.py' to train all models")
 
 
 if __name__ == "__main__":

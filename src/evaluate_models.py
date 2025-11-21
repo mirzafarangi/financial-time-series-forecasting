@@ -1,6 +1,6 @@
 """
 Model Comparison and Evaluation
-Compare ARIMA, SARIMA, and Prophet models
+Compare ARIMA, SARIMA, Prophet, GARCH, and LSTM models
 """
 
 import pandas as pd
@@ -8,19 +8,32 @@ import numpy as np
 from pathlib import Path
 import matplotlib.pyplot as plt
 import seaborn as sns
+import os
 
 
 def load_metrics():
     """Load all model metrics"""
     results_dir = Path(__file__).parent.parent / "results"
     
-    # Load individual metrics
-    arima_metrics = pd.read_csv(results_dir / 'arima_metrics.csv')
-    sarima_metrics = pd.read_csv(results_dir / 'sarima_metrics.csv')
-    prophet_metrics = pd.read_csv(results_dir / 'prophet_metrics.csv')
+    # Load individual metrics (check if files exist)
+    metrics_list = []
     
-    # Combine
-    all_metrics = pd.concat([arima_metrics, sarima_metrics, prophet_metrics], ignore_index=True)
+    # Price forecasting models
+    for model_name in ['arima', 'sarima', 'prophet', 'lstm']:
+        metrics_file = results_dir / f'{model_name}_metrics.csv'
+        if metrics_file.exists():
+            metrics_list.append(pd.read_csv(metrics_file))
+        else:
+            print(f"Warning: {metrics_file} not found, skipping {model_name}")
+    
+    # GARCH is for volatility, not price forecasting - handle separately
+    
+    # Combine price forecasting metrics
+    if metrics_list:
+        all_metrics = pd.concat(metrics_list, ignore_index=True)
+    else:
+        print("Error: No model metrics found!")
+        all_metrics = pd.DataFrame()
     
     return all_metrics
 
@@ -59,84 +72,98 @@ def plot_comparison(metrics_df):
     plt.rcParams['font.sans-serif'] = ['Arial']
     
     # Create figure with subplots
-    fig, axes = plt.subplots(2, 2, figsize=(16, 11))
+    fig, axes = plt.subplots(2, 2, figsize=(17, 11))
     
     models = metrics_df['model'].values
-    # Highlight best model (SARIMA) with different color
-    colors = ['#3498db', '#2ecc71', '#95a5a6']  # ARIMA, SARIMA (green=best), Prophet
+    n_models = len(models)
+    
+    # Dynamic colors based on number of models
+    color_palette = ['#3498db', '#2ecc71', '#95a5a6', '#e74c3c', '#f39c12']
+    colors = color_palette[:n_models]
+    
+    # Find best model index for each metric
+    best_mae_idx = metrics_df['mae'].idxmin()
+    best_rmse_idx = metrics_df['rmse'].idxmin()
+    best_mape_idx = metrics_df['mape'].idxmin()
+    best_direction_idx = metrics_df['direction_accuracy'].idxmax()
     
     # 1. MAE Comparison
     ax = axes[0, 0]
     bars = ax.bar(models, metrics_df['mae'], color=colors, alpha=0.8, edgecolor='black', linewidth=1.5)
     # Highlight best model
-    bars[1].set_edgecolor('#27ae60')
-    bars[1].set_linewidth(3)
+    bars[best_mae_idx].set_edgecolor('#27ae60')
+    bars[best_mae_idx].set_linewidth(3)
     ax.set_ylabel('Mean Absolute Error ($)', fontsize=12, fontweight='bold')
     ax.set_title('MAE - Lower is Better', fontsize=13, fontweight='bold', pad=15)
     ax.grid(True, alpha=0.25, axis='y', linestyle='--')
     for i, (m, v) in enumerate(zip(models, metrics_df['mae'])):
-        label = f'${v:.0f}' if i == 1 else f'${v:.0f}'
-        weight = 'bold' if i == 1 else 'normal'
-        ax.text(i, v + 80, label, ha='center', fontweight=weight, fontsize=11)
+        label = f'${v:,.0f}'
+        weight = 'bold' if i == best_mae_idx else 'normal'
+        offset = max(metrics_df['mae']) * 0.02
+        ax.text(i, v + offset, label, ha='center', fontweight=weight, fontsize=10)
     
     # 2. RMSE Comparison
     ax = axes[0, 1]
     bars = ax.bar(models, metrics_df['rmse'], color=colors, alpha=0.8, edgecolor='black', linewidth=1.5)
-    bars[1].set_edgecolor('#27ae60')
-    bars[1].set_linewidth(3)
+    bars[best_rmse_idx].set_edgecolor('#27ae60')
+    bars[best_rmse_idx].set_linewidth(3)
     ax.set_ylabel('Root Mean Squared Error ($)', fontsize=12, fontweight='bold')
     ax.set_title('RMSE - Lower is Better', fontsize=13, fontweight='bold', pad=15)
     ax.grid(True, alpha=0.25, axis='y', linestyle='--')
     for i, (m, v) in enumerate(zip(models, metrics_df['rmse'])):
-        label = f'${v:.0f}' if i == 1 else f'${v:.0f}'
-        weight = 'bold' if i == 1 else 'normal'
-        ax.text(i, v + 100, label, ha='center', fontweight=weight, fontsize=11)
+        label = f'${v:,.0f}'
+        weight = 'bold' if i == best_rmse_idx else 'normal'
+        offset = max(metrics_df['rmse']) * 0.02
+        ax.text(i, v + offset, label, ha='center', fontweight=weight, fontsize=10)
     
     # 3. MAPE Comparison (MOST IMPORTANT)
     ax = axes[1, 0]
     bars = ax.bar(models, metrics_df['mape'], color=colors, alpha=0.8, edgecolor='black', linewidth=1.5)
-    bars[1].set_edgecolor('#27ae60')
-    bars[1].set_linewidth(3)
+    bars[best_mape_idx].set_edgecolor('#27ae60')
+    bars[best_mape_idx].set_linewidth(3)
     ax.set_ylabel('Mean Absolute Percentage Error (%)', fontsize=12, fontweight='bold')
-    ax.set_title('MAPE - Industry Standard Metric (Lower is Better)', 
+    ax.set_title('MAPE - Industry Standard (Lower is Better)', 
                  fontsize=13, fontweight='bold', pad=15)
     ax.grid(True, alpha=0.25, axis='y', linestyle='--')
     for i, (m, v) in enumerate(zip(models, metrics_df['mape'])):
-        label = f'{v:.2f}%\n⭐ BEST' if i == 1 else f'{v:.2f}%'
-        weight = 'bold' if i == 1 else 'normal'
-        color_text = '#27ae60' if i == 1 else 'black'
-        ax.text(i, v + 0.12, label, ha='center', fontweight=weight, fontsize=11, color=color_text)
+        label = f'{v:.2f}%\nBEST' if i == best_mape_idx else f'{v:.2f}%'
+        weight = 'bold' if i == best_mape_idx else 'normal'
+        color_text = '#27ae60' if i == best_mape_idx else 'black'
+        offset = max(metrics_df['mape']) * 0.03
+        ax.text(i, v + offset, label, ha='center', fontweight=weight, fontsize=10, color=color_text)
     
     # 4. Direction Accuracy Comparison
     ax = axes[1, 1]
     bars = ax.bar(models, metrics_df['direction_accuracy'], color=colors, alpha=0.8, 
                   edgecolor='black', linewidth=1.5)
-    bars[0].set_edgecolor('#e74c3c')  # Highlight ARIMA (tied best)
-    bars[0].set_linewidth(3)
-    bars[2].set_edgecolor('#e74c3c')  # Highlight Prophet (tied best)
-    bars[2].set_linewidth(3)
+    bars[best_direction_idx].set_edgecolor('#e74c3c')
+    bars[best_direction_idx].set_linewidth(3)
     ax.set_ylabel('Direction Accuracy (%)', fontsize=12, fontweight='bold')
     ax.set_title('Direction Prediction - Higher is Better', fontsize=13, fontweight='bold', pad=15)
-    ax.axhline(y=50, color='#c0392b', linestyle='--', alpha=0.6, linewidth=2, label='Random Baseline (50%)')
+    ax.axhline(y=50, color='#c0392b', linestyle='--', alpha=0.6, linewidth=2, label='Random (50%)')
     ax.grid(True, alpha=0.25, axis='y', linestyle='--')
     ax.legend(fontsize=10, loc='lower right')
-    ax.set_ylim([40, 100])
+    y_min = max(0, metrics_df['direction_accuracy'].min() - 10)
+    ax.set_ylim([y_min, 100])
     for i, (m, v) in enumerate(zip(models, metrics_df['direction_accuracy'])):
-        weight = 'bold' if i in [0, 2] else 'normal'
-        ax.text(i, v + 1.5, f'{v:.1f}%', ha='center', fontweight=weight, fontsize=11)
+        weight = 'bold' if i == best_direction_idx else 'normal'
+        offset = 2
+        ax.text(i, v + offset, f'{v:.1f}%', ha='center', fontweight=weight, fontsize=10)
     
     plt.suptitle('Bitcoin Price Forecasting - Model Performance Comparison', 
                  fontsize=16, fontweight='bold', y=0.995)
     
     # Add overall winner annotation
-    fig.text(0.5, 0.02, '⭐ SARIMA is the best model with 1.07% MAPE and lowest overall error', 
+    best_model = metrics_df.loc[best_mape_idx, 'model']
+    best_mape_val = metrics_df.loc[best_mape_idx, 'mape']
+    fig.text(0.5, 0.02, f'{best_model} achieves lowest MAPE: {best_mape_val:.2f}%', 
              ha='center', fontsize=12, fontweight='bold', 
              bbox=dict(boxstyle='round', facecolor='lightgreen', alpha=0.8))
     
     plt.tight_layout(rect=[0, 0.03, 1, 0.99])
     
     plt.savefig(results_dir / 'model_comparison.png', dpi=300, bbox_inches='tight')
-    print(f"\n💾 Saved: {results_dir / 'model_comparison.png'}")
+    print(f"\nSaved: {results_dir / 'model_comparison.png'}")
     plt.close()
 
 
