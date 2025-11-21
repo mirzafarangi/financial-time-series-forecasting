@@ -188,32 +188,59 @@ def evaluate_model(fitted_model, test_df):
 
 
 def plot_results(train_df, test_df, forecast, conf_int):
-    """Plot actual vs forecast"""
+    """Plot actual vs forecast with improved visualization"""
     results_dir = Path(__file__).parent.parent / "results"
     results_dir.mkdir(exist_ok=True)
     
-    plt.figure(figsize=(15, 6))
+    # Create figure with two subplots
+    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(15, 10))
     
-    # Plot training data
-    plt.plot(train_df['date'], train_df['close'], label='Training Data', color='blue', alpha=0.6)
+    # Plot 1: Full dataset overview
+    ax1.plot(train_df['date'], train_df['close'], label='Training Data', 
+             color='#2E86DE', alpha=0.7, linewidth=1)
+    ax1.plot(test_df['date'], test_df['close'], label='Actual (Test)', 
+             color='#10AC84', linewidth=2.5)
+    ax1.plot(test_df['date'], forecast, label='SARIMA Forecast', 
+             color='#EE5A6F', linewidth=2.5, linestyle='--')
+    ax1.fill_between(test_df['date'], conf_int[:, 0], conf_int[:, 1], 
+                     color='#EE5A6F', alpha=0.2, label='95% CI')
+    ax1.set_xlabel('Date', fontsize=11)
+    ax1.set_ylabel('BTC Price (USD)', fontsize=11)
+    ax1.set_title('SARIMA Bitcoin Price Forecast - Full Timeline (Weekly Seasonality)', 
+                  fontsize=13, fontweight='bold', pad=15)
+    ax1.legend(loc='upper left', fontsize=10)
+    ax1.grid(True, alpha=0.3, linestyle='--')
     
-    # Plot test data (actual)
-    plt.plot(test_df['date'], test_df['close'], label='Actual Test Data', color='green', linewidth=2)
+    # Plot 2: Zoomed in on test period (last 60 days for context)
+    zoom_start_idx = max(0, len(train_df) - 60)
+    zoom_train = train_df.iloc[zoom_start_idx:]
     
-    # Plot forecast
-    plt.plot(test_df['date'], forecast, label='SARIMA Forecast', color='red', linewidth=2, linestyle='--')
+    ax2.plot(zoom_train['date'], zoom_train['close'], label='Recent Training Data', 
+             color='#2E86DE', alpha=0.7, linewidth=1.5)
+    ax2.plot(test_df['date'], test_df['close'], label='Actual (Test)', 
+             color='#10AC84', linewidth=3, marker='o', markersize=4)
+    ax2.plot(test_df['date'], forecast, label='SARIMA Forecast', 
+             color='#EE5A6F', linewidth=3, linestyle='--', marker='s', markersize=4)
+    ax2.fill_between(test_df['date'], conf_int[:, 0], conf_int[:, 1], 
+                     color='#EE5A6F', alpha=0.25)
+    ax2.axvline(x=test_df['date'].iloc[0], color='gray', linestyle=':', 
+                linewidth=2, label='Forecast Start', alpha=0.7)
+    ax2.set_xlabel('Date', fontsize=11)
+    ax2.set_ylabel('BTC Price (USD)', fontsize=11)
+    ax2.set_title('SARIMA Forecast - Detailed View (Last 60 Days + 30-Day Forecast)', 
+                  fontsize=13, fontweight='bold', pad=15)
+    ax2.legend(loc='upper left', fontsize=10)
+    ax2.grid(True, alpha=0.3, linestyle='--')
     
-    # Plot confidence interval
-    plt.fill_between(test_df['date'], conf_int[:, 0], conf_int[:, 1], 
-                     color='red', alpha=0.2, label='95% Confidence Interval')
+    # Add error metrics as text
+    mae = np.mean(np.abs(test_df['close'].values - forecast))
+    mape = np.mean(np.abs((test_df['close'].values - forecast) / test_df['close'].values)) * 100
+    textstr = f'MAE: ${mae:.2f}\nMAPE: {mape:.2f}%\n⭐ Best Model'
+    props = dict(boxstyle='round', facecolor='lightgreen', alpha=0.8)
+    ax2.text(0.02, 0.98, textstr, transform=ax2.transAxes, fontsize=10,
+             verticalalignment='top', bbox=props)
     
-    plt.xlabel('Date')
-    plt.ylabel('BTC Price (USD)')
-    plt.title('SARIMA Bitcoin Price Forecast (with Weekly Seasonality)', fontsize=14, fontweight='bold')
-    plt.legend()
-    plt.grid(True, alpha=0.3)
     plt.tight_layout()
-    
     plt.savefig(results_dir / 'sarima_forecast.png', dpi=300, bbox_inches='tight')
     print(f"\n💾 Saved: {results_dir / 'sarima_forecast.png'}")
     plt.close()

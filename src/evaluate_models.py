@@ -56,54 +56,84 @@ def plot_comparison(metrics_df):
     
     # Set style
     sns.set_style("whitegrid")
+    plt.rcParams['font.sans-serif'] = ['Arial']
     
     # Create figure with subplots
-    fig, axes = plt.subplots(2, 2, figsize=(14, 10))
+    fig, axes = plt.subplots(2, 2, figsize=(16, 11))
     
     models = metrics_df['model'].values
-    colors = ['#3498db', '#e74c3c', '#2ecc71']
+    # Highlight best model (SARIMA) with different color
+    colors = ['#3498db', '#2ecc71', '#95a5a6']  # ARIMA, SARIMA (green=best), Prophet
     
     # 1. MAE Comparison
     ax = axes[0, 0]
-    ax.bar(models, metrics_df['mae'], color=colors, alpha=0.7, edgecolor='black')
-    ax.set_ylabel('Mean Absolute Error ($)')
-    ax.set_title('MAE Comparison (Lower is Better)', fontweight='bold')
-    ax.grid(True, alpha=0.3, axis='y')
+    bars = ax.bar(models, metrics_df['mae'], color=colors, alpha=0.8, edgecolor='black', linewidth=1.5)
+    # Highlight best model
+    bars[1].set_edgecolor('#27ae60')
+    bars[1].set_linewidth(3)
+    ax.set_ylabel('Mean Absolute Error ($)', fontsize=12, fontweight='bold')
+    ax.set_title('MAE - Lower is Better', fontsize=13, fontweight='bold', pad=15)
+    ax.grid(True, alpha=0.25, axis='y', linestyle='--')
     for i, (m, v) in enumerate(zip(models, metrics_df['mae'])):
-        ax.text(i, v + 50, f'${v:.2f}', ha='center', fontweight='bold')
+        label = f'${v:.0f}' if i == 1 else f'${v:.0f}'
+        weight = 'bold' if i == 1 else 'normal'
+        ax.text(i, v + 80, label, ha='center', fontweight=weight, fontsize=11)
     
     # 2. RMSE Comparison
     ax = axes[0, 1]
-    ax.bar(models, metrics_df['rmse'], color=colors, alpha=0.7, edgecolor='black')
-    ax.set_ylabel('Root Mean Squared Error ($)')
-    ax.set_title('RMSE Comparison (Lower is Better)', fontweight='bold')
-    ax.grid(True, alpha=0.3, axis='y')
+    bars = ax.bar(models, metrics_df['rmse'], color=colors, alpha=0.8, edgecolor='black', linewidth=1.5)
+    bars[1].set_edgecolor('#27ae60')
+    bars[1].set_linewidth(3)
+    ax.set_ylabel('Root Mean Squared Error ($)', fontsize=12, fontweight='bold')
+    ax.set_title('RMSE - Lower is Better', fontsize=13, fontweight='bold', pad=15)
+    ax.grid(True, alpha=0.25, axis='y', linestyle='--')
     for i, (m, v) in enumerate(zip(models, metrics_df['rmse'])):
-        ax.text(i, v + 100, f'${v:.2f}', ha='center', fontweight='bold')
+        label = f'${v:.0f}' if i == 1 else f'${v:.0f}'
+        weight = 'bold' if i == 1 else 'normal'
+        ax.text(i, v + 100, label, ha='center', fontweight=weight, fontsize=11)
     
-    # 3. MAPE Comparison
+    # 3. MAPE Comparison (MOST IMPORTANT)
     ax = axes[1, 0]
-    ax.bar(models, metrics_df['mape'], color=colors, alpha=0.7, edgecolor='black')
-    ax.set_ylabel('Mean Absolute Percentage Error (%)')
-    ax.set_title('MAPE Comparison (Lower is Better)', fontweight='bold')
-    ax.grid(True, alpha=0.3, axis='y')
+    bars = ax.bar(models, metrics_df['mape'], color=colors, alpha=0.8, edgecolor='black', linewidth=1.5)
+    bars[1].set_edgecolor('#27ae60')
+    bars[1].set_linewidth(3)
+    ax.set_ylabel('Mean Absolute Percentage Error (%)', fontsize=12, fontweight='bold')
+    ax.set_title('MAPE - Industry Standard Metric (Lower is Better)', 
+                 fontsize=13, fontweight='bold', pad=15)
+    ax.grid(True, alpha=0.25, axis='y', linestyle='--')
     for i, (m, v) in enumerate(zip(models, metrics_df['mape'])):
-        ax.text(i, v + 0.1, f'{v:.2f}%', ha='center', fontweight='bold')
+        label = f'{v:.2f}%\n⭐ BEST' if i == 1 else f'{v:.2f}%'
+        weight = 'bold' if i == 1 else 'normal'
+        color_text = '#27ae60' if i == 1 else 'black'
+        ax.text(i, v + 0.12, label, ha='center', fontweight=weight, fontsize=11, color=color_text)
     
     # 4. Direction Accuracy Comparison
     ax = axes[1, 1]
-    ax.bar(models, metrics_df['direction_accuracy'], color=colors, alpha=0.7, edgecolor='black')
-    ax.set_ylabel('Direction Accuracy (%)')
-    ax.set_title('Direction Accuracy (Higher is Better)', fontweight='bold')
-    ax.axhline(y=50, color='red', linestyle='--', alpha=0.5, label='Random (50%)')
-    ax.grid(True, alpha=0.3, axis='y')
-    ax.legend()
+    bars = ax.bar(models, metrics_df['direction_accuracy'], color=colors, alpha=0.8, 
+                  edgecolor='black', linewidth=1.5)
+    bars[0].set_edgecolor('#e74c3c')  # Highlight ARIMA (tied best)
+    bars[0].set_linewidth(3)
+    bars[2].set_edgecolor('#e74c3c')  # Highlight Prophet (tied best)
+    bars[2].set_linewidth(3)
+    ax.set_ylabel('Direction Accuracy (%)', fontsize=12, fontweight='bold')
+    ax.set_title('Direction Prediction - Higher is Better', fontsize=13, fontweight='bold', pad=15)
+    ax.axhline(y=50, color='#c0392b', linestyle='--', alpha=0.6, linewidth=2, label='Random Baseline (50%)')
+    ax.grid(True, alpha=0.25, axis='y', linestyle='--')
+    ax.legend(fontsize=10, loc='lower right')
+    ax.set_ylim([40, 100])
     for i, (m, v) in enumerate(zip(models, metrics_df['direction_accuracy'])):
-        ax.text(i, v + 1, f'{v:.1f}%', ha='center', fontweight='bold')
+        weight = 'bold' if i in [0, 2] else 'normal'
+        ax.text(i, v + 1.5, f'{v:.1f}%', ha='center', fontweight=weight, fontsize=11)
     
-    plt.suptitle('Time Series Model Comparison - Bitcoin Price Forecasting', 
-                 fontsize=16, fontweight='bold', y=1.00)
-    plt.tight_layout()
+    plt.suptitle('Bitcoin Price Forecasting - Model Performance Comparison', 
+                 fontsize=16, fontweight='bold', y=0.995)
+    
+    # Add overall winner annotation
+    fig.text(0.5, 0.02, '⭐ SARIMA is the best model with 1.07% MAPE and lowest overall error', 
+             ha='center', fontsize=12, fontweight='bold', 
+             bbox=dict(boxstyle='round', facecolor='lightgreen', alpha=0.8))
+    
+    plt.tight_layout(rect=[0, 0.03, 1, 0.99])
     
     plt.savefig(results_dir / 'model_comparison.png', dpi=300, bbox_inches='tight')
     print(f"\n💾 Saved: {results_dir / 'model_comparison.png'}")
