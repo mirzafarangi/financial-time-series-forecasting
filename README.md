@@ -33,11 +33,11 @@ This project implements and compares three time series forecasting models to pre
 
 | Model | MAE ($) | RMSE ($) | MAPE (%) | Direction Accuracy (%) |
 |-------|---------|----------|----------|------------------------|
-| **SARIMA** ⭐ | **932.45** | **1,160.91** | **1.07** | **89.66** |
+| **SARIMA** | **932.45** | **1,160.91** | **1.07** | **89.66** |
 | ARIMA | 1,546.73 | 2,044.49 | 1.77 | 96.55 |
 | Prophet | 2,148.22 | 2,229.28 | 2.51 | 96.55 |
 
-### 🏆 Best Model: SARIMA
+### Best Model: SARIMA
 
 **SARIMA(2,1,1)×(2,0,0,7)** - Seasonal ARIMA with weekly seasonality
 
