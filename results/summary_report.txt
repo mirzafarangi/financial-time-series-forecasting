@@ -12,23 +12,23 @@ PERFORMANCE METRICS
 
 Model         MAE ($)   RMSE ($)   MAPE (%)   Dir. Acc. (%)
 ------------------------------------------------------------
-ARIMA         1546.73    2044.49       1.77           96.55
-SARIMA         932.45    1160.91       1.07           89.66
-Prophet       2148.22    2229.28       2.51           96.55
+ARIMA         6693.29    8735.92       6.86            0.00
+SARIMA        6696.06    8740.35       6.86            0.00
+Prophet      25659.07   28869.78      25.80           44.83
 
 ================================================================================
 KEY FINDINGS
 ================================================================================
 
-🏆 Best Overall (MAPE): SARIMA
-   - MAPE: 1.07%
-   - Direction Accuracy: 89.66%
+🏆 Best Overall (MAPE): ARIMA
+   - MAPE: 6.86%
+   - Direction Accuracy: 0.00%
 
-📊 Lowest Error (MAE): SARIMA
-   - MAE: $932.45
+📊 Lowest Error (MAE): ARIMA
+   - MAE: $6693.29
 
-🎯 Best Direction Prediction: ARIMA
-   - Direction Accuracy: 96.55%
+🎯 Best Direction Prediction: Prophet
+   - Direction Accuracy: 44.83%
 
 ================================================================================
 BUSINESS INSIGHTS
