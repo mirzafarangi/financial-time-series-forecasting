@@ -13,3 +13,6 @@ This file tracks ongoing development and maintenance activities.
 ### 2025-11-30 - Optimize data preprocessing pipeline for financial indicators
 Restructured feature engineering module with technical indicators. Implemented efficient rolling window calculations for real-time forecasting.
 
+### 2025-11-30 - Implement LSTM architecture for multi-horizon forecasting
+Added deep learning model with attention mechanism for improved long-term predictions. Integrated volatility clustering in the architecture.
+
