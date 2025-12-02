@@ -25,3 +25,6 @@ Added deep learning model with attention mechanism for improved long-term predic
 ### 2025-12-02 - Optimize data preprocessing pipeline for financial indicators
 Restructured feature engineering module with technical indicators. Implemented efficient rolling window calculations for real-time forecasting.
 
+### 2025-12-02 - Address non-stationarity issues in time series decomposition
+Applied advanced detrending techniques and seasonal adjustment. Improved forecast accuracy by handling structural breaks in financial data.
+
