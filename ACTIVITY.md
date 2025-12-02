@@ -28,3 +28,6 @@ Restructured feature engineering module with technical indicators. Implemented e
 ### 2025-12-02 - Address non-stationarity issues in time series decomposition
 Applied advanced detrending techniques and seasonal adjustment. Improved forecast accuracy by handling structural breaks in financial data.
 
+### 2025-12-02 - Implement LSTM architecture for multi-horizon forecasting
+Added deep learning model with attention mechanism for improved long-term predictions. Integrated volatility clustering in the architecture.
+
