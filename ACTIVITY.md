@@ -34,3 +34,6 @@ Added deep learning model with attention mechanism for improved long-term predic
 ### 2025-12-03 - Add comprehensive backtesting framework for trading strategies
 Developed walk-forward validation system with realistic transaction costs. Implemented Sharpe ratio and maximum drawdown metrics.
 
+### 2025-12-03 - Add comprehensive backtesting framework for trading strategies
+Developed walk-forward validation system with realistic transaction costs. Implemented Sharpe ratio and maximum drawdown metrics.
+
