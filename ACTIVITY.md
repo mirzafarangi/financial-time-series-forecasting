@@ -40,3 +40,6 @@ Developed walk-forward validation system with realistic transaction costs. Imple
 ### 2025-12-03 - Address non-stationarity issues in time series decomposition
 Applied advanced detrending techniques and seasonal adjustment. Improved forecast accuracy by handling structural breaks in financial data.
 
+### 2025-12-05 - Implement LSTM architecture for multi-horizon forecasting
+Added deep learning model with attention mechanism for improved long-term predictions. Integrated volatility clustering in the architecture.
+
