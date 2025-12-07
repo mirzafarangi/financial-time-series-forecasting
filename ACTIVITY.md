@@ -46,3 +46,6 @@ Added deep learning model with attention mechanism for improved long-term predic
 ### 2025-12-07 - Optimize data preprocessing pipeline for financial indicators
 Restructured feature engineering module with technical indicators. Implemented efficient rolling window calculations for real-time forecasting.
 
+### 2025-12-07 - Implement LSTM architecture for multi-horizon forecasting
+Added deep learning model with attention mechanism for improved long-term predictions. Integrated volatility clustering in the architecture.
+
