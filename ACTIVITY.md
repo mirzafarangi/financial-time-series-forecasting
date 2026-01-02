@@ -124,3 +124,6 @@ Restructured feature engineering module with technical indicators. Implemented e
 ### 2026-01-01 - Implement LSTM architecture for multi-horizon forecasting
 Added deep learning model with attention mechanism for improved long-term predictions. Integrated volatility clustering in the architecture.
 
+### 2026-01-02 - Implement LSTM architecture for multi-horizon forecasting
+Added deep learning model with attention mechanism for improved long-term predictions. Integrated volatility clustering in the architecture.
+
