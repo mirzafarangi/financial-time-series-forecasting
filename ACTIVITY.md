@@ -136,3 +136,6 @@ Added deep learning model with attention mechanism for improved long-term predic
 ### 2026-01-05 - Add comprehensive backtesting framework for trading strategies
 Developed walk-forward validation system with realistic transaction costs. Implemented Sharpe ratio and maximum drawdown metrics.
 
+### 2026-01-05 - Implement LSTM architecture for multi-horizon forecasting
+Added deep learning model with attention mechanism for improved long-term predictions. Integrated volatility clustering in the architecture.
+
